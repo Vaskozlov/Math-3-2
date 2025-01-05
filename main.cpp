@@ -48,7 +48,7 @@ auto pathMethod(const double delta) -> double {
   return s;
 }
 
-auto gridMethod(const double delta) -> double {
+auto grinFormula(const double delta) -> double {
   auto f = [](const double /* x */, const double y) {
     return y;
   };
@@ -90,27 +90,33 @@ int main() {
   constexpr std::array<std::size_t, 9> nValues{20, 50, 100, 1000, 10'000, 100'000, 1'000'000, 10'000'000, 100'000'000};
   constexpr double answer = std::numbers::sqrt2 / 3.0;
 
+  std::println("Вычисление интеграла по пути");
+
   for (auto delta: deltas) {
     const auto begin = std::chrono::high_resolution_clock::now();
     auto result = pathMethod(delta);
     const auto end = std::chrono::high_resolution_clock::now();
-    std::println("{:.8e}, {:.8e}, {:.8e}, {:.8e}", delta, result,
-                 std::abs(result - answer), (end - begin) / 1.0s);
+    std::println("Шаг: {:.0e}, результат: {:.4}, отклонение от аналитического результата: {:.4}, время выполнения: {} нс", delta, result,
+                std::abs(result - answer), (end - begin) / 1ns);
   }
+
+  std::println("Вычисление интеграла с применением формулы Грина для области");
 
   for (auto delta: deltas | std::views::take(4)) {
     const auto begin = std::chrono::high_resolution_clock::now();
-    auto result = gridMethod(delta);
+    auto result = grinFormula(delta);
     const auto end = std::chrono::high_resolution_clock::now();
-    std::println("{:.8e}, {:.8e}, {:.8e}, {:.8e}", delta, result,
-                 std::abs(result - answer), (end - begin) / 1.0s);
+    std::println("Шаг: {:.0e}, результат: {:.4}, отклонение от аналитического результата: {:.4}, время выполнения: {} нс", delta, result,
+                std::abs(result - answer), (end - begin) / 1ns);
   }
+
+  std::println("Вычисление интеграла с применением формулы Грина и метода Монте-Карло для области");
 
   for (auto n: nValues) {
     const auto begin = std::chrono::high_resolution_clock::now();
     auto result = monteCarlo(n);
     const auto end = std::chrono::high_resolution_clock::now();
-    std::println("({}, {:.8e}, {:.8e}, {:.8e}),", n, result,
-                 std::abs(result - answer), (end - begin) / 1.0s);
+    std::println("N: {}, результат: {:.4}, отклонение от аналитического результата: {:.4}, время выполнения: {} нс", n, result,
+                std::abs(result - answer), (end - begin) / 1ns);
   }
 }
