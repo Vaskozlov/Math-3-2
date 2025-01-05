@@ -4,6 +4,7 @@
 #set text(lang: "ru")
 #set page(numbering: "1")
 
+= Козлов Василий Сергеевич
 
 = Задание 1
 
