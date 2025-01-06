@@ -24,9 +24,12 @@
 auto pathMethod(const double delta) -> double {
   constexpr double angle_start = std::numbers::pi / 4.0;
   constexpr double angle_end = -3.0 * std::numbers::pi / 4.0;
-  double s = 0.0;
 
-  for (double angle = angle_start; angle >= angle_end + delta; angle -= delta) {
+  auto n = static_cast<std::size_t>((angle_start - angle_end) / delta);
+  double s = 0.0;
+  double angle = angle_start;
+
+  for (std::size_t i = 0; i != n; ++i, angle -= delta) {
     const double x = std::cos(angle);
     const double y = std::sin(angle);
 
@@ -38,11 +41,13 @@ auto pathMethod(const double delta) -> double {
 
   const double x_start = std::cos(angle_end);
   const double x_end = std::cos(angle_start);
+  double x = x_start;
 
-  for (double x = x_start; x <= x_end; x += step) {
+  n = static_cast<std::size_t>((x_end - x_start) / step);
+
+  for (std::size_t i = 0; i != n; ++i, x += step) {
     s += f1(x, x) * step;
     s += f2(x, x) * step;
-    // s += 5.0 * x * x * step;
   }
 
   return s;
@@ -54,10 +59,14 @@ auto grinFormula(const double delta) -> double {
   };
 
   double s = 0.0;
+  double x = -1.0 + delta / 2.0;
+  const std::size_t n = static_cast<std::size_t>(std::ceil(2.0 / delta)) - 1U;
 
-  for (double y = -1.0; y < 1.0; y += delta) {
-    for (double x = -1.0; x < 1.0; x += delta) {
-      const double v = f(x + delta / 2.0, y + delta / 2.0) * delta * delta;
+  for (std::size_t i = 0; i != n; ++i, x += delta) {
+    double y = -1.0 + delta / 2.0;
+
+    for (std::size_t j = 0; j != n; ++j, y += delta) {
+      const double v = f(x, y) * delta * delta;
       s += (x >= y && x * x + y * y <= 1.0) ? v : 0.0;
     }
   }
@@ -66,9 +75,8 @@ auto grinFormula(const double delta) -> double {
 }
 
 auto monteCarlo(const std::size_t N) -> double {
-  static std::default_random_engine engine;
+  static std::mt19937_64 engine{std::random_device{}()};
   static std::uniform_real_distribution distribution(-1.0, 1.0);
-  engine.seed(std::chrono::system_clock::now().time_since_epoch().count());
 
   constexpr double S = 2.0 * 2.0;
   double s = 0.0;
@@ -86,7 +94,7 @@ auto monteCarlo(const std::size_t N) -> double {
 int main() {
   using namespace std::chrono_literals;
 
-  constexpr std::array deltas{1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8};
+  constexpr std::array deltas{1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9};
   constexpr std::array<std::size_t, 9> nValues{20, 50, 100, 1000, 10'000, 100'000, 1'000'000, 10'000'000, 100'000'000};
   constexpr double answer = std::numbers::sqrt2 / 3.0;
 
